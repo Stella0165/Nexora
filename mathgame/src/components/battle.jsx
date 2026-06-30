@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { sampleQuestions } from '../data/sampleQuestions'
-import { generateMathQuestions, generateBossLine } from '../lib/gemma'
+import { generateMathQuestions, generateBossLine } from '../lib/ai'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
 import './battle.css'
@@ -41,8 +41,6 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
   const [bossLine, setBossLine] = useState(null)
   const inputRef = useRef(null)
 
-  // Ask Gemma to forge fresh battle questions for this fight. Falls back to
-  // the static question bank if the model is unavailable or unconfigured.
   useEffect(() => {
     let cancelled = false
 
@@ -64,7 +62,6 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [bossName])
 
-  // Ask Gemma for an in-character line once the duel ends.
   useEffect(() => {
     if (!gameOver) return
     let cancelled = false
@@ -227,7 +224,7 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
             </div>
 
             {questionsSource === 'fallback' && (
-              <p className="ai-status">Running on the backup question bank (Gemma was unavailable).</p>
+              <p className="ai-status">Running on the backup question bank.</p>
             )}
           </>
         )}

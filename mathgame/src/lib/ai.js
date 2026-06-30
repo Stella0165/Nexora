@@ -6,24 +6,27 @@ const ai = new GoogleGenAI({
 
 const MODEL =
   import.meta.env.VITE_GEMMA_MODEL || "gemma-3-27b-it";
-
 async function callAi(
   prompt,
   { temperature = 0.8, maxOutputTokens = 600 } = {}
 ) {
   const response = await ai.models.generateContent({
     model: MODEL,
-    contents: prompt,
+    contents: [{ role: "user", parts: [{ text: prompt }] }],
     config: {
       temperature,
       maxOutputTokens,
     },
   });
 
-  const text = response.text;
+  const text =
+    response?.candidates?.[0]?.content?.parts
+      ?.map(p => p.text)
+      .join("") ?? "";
 
   if (!text) {
-    throw new Error("Gemma returned an empty response");
+    console.log("Full response:", response);
+    throw new Error("Gemma returned empty response");
   }
 
   return text;
