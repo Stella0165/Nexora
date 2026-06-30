@@ -1,5 +1,6 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { sampleQuestions } from '../data/sampleQuestions'
+import { generateMathQuestions, generateBossLine } from '../lib/gemma'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
 import './battle.css'
@@ -9,12 +10,26 @@ const PLAYER_MAX_HP = 100
 const DAMAGE_PER_CORRECT = 20
 const DAMAGE_PER_WRONG = 15
 
+const FALLBACK_VICTORY_LINES = [
+  'No... my flames have failed me. You have bested me, hero.',
+  'Impossible! My numbers... they betray me!',
+]
+const FALLBACK_DEFEAT_LINES = [
+  'Your math was no match for my fury!',
+  'Another challenger falls before the Math Dragon!',
+]
+
 function shuffle(array) {
   return [...array].sort(() => Math.random() - 0.5)
 }
 
-export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
-  const [questions] = useState(() => shuffle(sampleQuestions))
+function randomOf(arr) {
+  return arr[Math.floor(Math.random() * arr.length)]
+}
+
+export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
+  const [questions, setQuestions] = useState(() => shuffle(sampleQuestions))
+  const [questionsSource, setQuestionsSource] = useState('loading') // 'loading' | 'ai' | 'fallback'
   const [questionIndex, setQuestionIndex] = useState(0)
   const [bossHp, setBossHp] = useState(BOSS_MAX_HP)
   const [playerHp, setPlayerHp] = useState(PLAYER_MAX_HP)
@@ -23,13 +38,59 @@ export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
   const [gameOver, setGameOver] = useState(null)
   const [bossAnim, setBossAnim] = useState('')
   const [heroAnim, setHeroAnim] = useState('')
+  const [bossLine, setBossLine] = useState(null)
   const inputRef = useRef(null)
+
+  // Ask Gemma to forge fresh battle questions for this fight. Falls back to
+  // the static question bank if the model is unavailable or unconfigured.
+  useEffect(() => {
+    let cancelled = false
+
+    generateMathQuestions(bossName, { count: 10, difficulty: 'medium' })
+      .then((aiQuestions) => {
+        if (cancelled) return
+        setQuestions(shuffle(aiQuestions))
+        setQuestionsSource('ai')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setQuestions(shuffle(sampleQuestions))
+        setQuestionsSource('fallback')
+      })
+
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [bossName])
+
+  // Ask Gemma for an in-character line once the duel ends.
+  useEffect(() => {
+    if (!gameOver) return
+    let cancelled = false
+
+    generateBossLine(bossName, gameOver)
+      .then((line) => {
+        if (!cancelled) setBossLine(line)
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setBossLine(
+            gameOver === 'victory' ? randomOf(FALLBACK_VICTORY_LINES) : randomOf(FALLBACK_DEFEAT_LINES)
+          )
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [gameOver, bossName])
 
   const currentQuestion = questions[questionIndex % questions.length]
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    if (gameOver || feedback) return
+    if (gameOver || feedback || questionsSource === 'loading') return
 
     const isCorrect = parseInt(userAnswer, 10) === currentQuestion.answer
 
@@ -86,6 +147,7 @@ export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
           </div>
           <h2>Victory!</h2>
           <p>You defeated {bossName}!</p>
+          <p className="boss-line">{bossLine ?? '\u00A0'}</p>
         </div>
       </div>
     )
@@ -97,6 +159,7 @@ export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
         <div className="result-card result-defeat">
           <h2>Defeated...</h2>
           <p>{bossName} was too strong. Try again!</p>
+          <p className="boss-line">{bossLine ?? '\u00A0'}</p>
         </div>
       </div>
     )
@@ -115,7 +178,7 @@ export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
         <div className="boss-hp-card">
           <div className="boss-name">{bossName}</div>
           <HpRow hp={bossHp} maxHp={BOSS_MAX_HP} />
-          <HpBar hp={bossHp} maxHp={BOSS_MAX_HP} color="#e74c3c" />
+          <HpBar hp={bossHp} maxHp={BOSS_MAX_HP} variant="boss" />
         </div>
         <div className={`boss-svg-wrap ${bossAnim}`}>
           <DragonSvg />
@@ -124,7 +187,7 @@ export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
         <div className="player-hp-card">
           <div className="player-name">You</div>
           <HpRow hp={playerHp} maxHp={PLAYER_MAX_HP} />
-          <HpBar hp={playerHp} maxHp={PLAYER_MAX_HP} color="#2ecc71" />
+          <HpBar hp={playerHp} maxHp={PLAYER_MAX_HP} variant="player" />
         </div>
         <div className={`hero-svg-wrap ${heroAnim}`}>
           <HeroSvg />
@@ -132,32 +195,42 @@ export default function Battle({ bossName = "Math Dragon", onBattleEnd }) {
       </div>
 
       <div className="question-box">
-        <p className="question-text">{currentQuestion.question}</p>
+        {questionsSource === 'loading' ? (
+          <p className="question-loading">Summoning a question from the arcane mists...</p>
+        ) : (
+          <>
+            <p className="question-text">{currentQuestion.question}</p>
 
-        <form onSubmit={handleSubmit} className="answer-form">
-          <input
-            ref={inputRef}
-            type="number"
-            value={userAnswer}
-            onChange={(e) => setUserAnswer(e.target.value)}
-            placeholder="Answer"
-            className="answer-input"
-            autoFocus
-            disabled={feedback !== null}
-          />
-          <button type="submit" className="attack-button" disabled={feedback !== null}>
-            Attack!
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="answer-form">
+              <input
+                ref={inputRef}
+                type="number"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                placeholder="Answer"
+                className="answer-input"
+                autoFocus
+                disabled={feedback !== null}
+              />
+              <button type="submit" className="attack-button" disabled={feedback !== null}>
+                Attack!
+              </button>
+            </form>
 
-        <div className="feedback-slot">
-          {feedback === 'correct' && <p className="feedback-correct">Correct! You strike the boss!</p>}
-          {feedback === 'wrong' && (
-            <p className="feedback-wrong">
-              You got it wrong, the answer was {currentQuestion.answer}. The boss attacks!
-            </p>
-          )}
-        </div>
+            <div className="feedback-slot">
+              {feedback === 'correct' && <p className="feedback-correct">Correct! You strike the boss!</p>}
+              {feedback === 'wrong' && (
+                <p className="feedback-wrong">
+                  You got it wrong, the answer was {currentQuestion.answer}. The boss attacks!
+                </p>
+              )}
+            </div>
+
+            {questionsSource === 'fallback' && (
+              <p className="ai-status">Running on the backup question bank (Gemma was unavailable).</p>
+            )}
+          </>
+        )}
       </div>
     </div>
   )
@@ -172,11 +245,11 @@ function HpRow({ hp, maxHp }) {
   )
 }
 
-function HpBar({ hp, maxHp, color }) {
+function HpBar({ hp, maxHp, variant }) {
   const pct = Math.max(0, Math.min(100, (hp / maxHp) * 100))
   return (
     <div className="hp-bar-outer">
-      <div className="hp-bar-inner" style={{ width: `${pct}%`, background: color }} />
+      <div className={`hp-bar-inner hp-bar-${variant}`} style={{ width: `${pct}%` }} />
     </div>
   )
 }

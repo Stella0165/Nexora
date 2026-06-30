@@ -3,9 +3,14 @@ import Battle from './components/battle'
 import './App.css'
 
 const XP_PER_VICTORY = 30
+const XP_PER_LEVEL = 100
 
 function levelFromXp(xp) {
-  return Math.floor(xp / 100) + 1
+  return Math.floor(xp / XP_PER_LEVEL) + 1
+}
+
+function xpProgress(xp) {
+  return xp % XP_PER_LEVEL
 }
 
 function App() {
@@ -30,21 +35,45 @@ function App() {
     )
   }
 
+  const level = levelFromXp(player.xp)
+  const progress = xpProgress(player.xp)
+
   return (
     <div className="app-shell">
       <div className="home-card">
-        <h1>Nexora</h1>
-        <p className="player-greeting">Welcome, {player.username}!</p>
-        <p className="player-stats">Level {levelFromXp(player.xp)} &middot; {player.xp} XP</p>
+        <div className="rune-corner rune-corner-tl" />
+        <div className="rune-corner rune-corner-tr" />
+        <div className="rune-corner rune-corner-bl" />
+        <div className="rune-corner rune-corner-br" />
+
+        <div className="sigil" aria-hidden="true">
+          <svg viewBox="0 0 64 64" className="sigil-svg">
+            <polygon points="32,4 58,46 6,46" />
+            <circle cx="32" cy="32" r="20" />
+          </svg>
+        </div>
+
+        <h1 className="game-title">Nexora</h1>
+        <p className="player-greeting">Welcome back, {player.username}</p>
+
+        <div className="level-block">
+          <div className="level-label-row">
+            <span className="level-tag">Level {level}</span>
+            <span className="xp-tag">{progress}/{XP_PER_LEVEL} XP</span>
+          </div>
+          <div className="xp-bar-outer">
+            <div className="xp-bar-inner" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
 
         {lastResult === 'victory' && (
           <p className="result-banner result-banner-win">
-            You won your last battle! +{XP_PER_VICTORY} XP
+            Victory! You earned +{XP_PER_VICTORY} XP
           </p>
         )}
         {lastResult === 'defeat' && (
           <p className="result-banner result-banner-loss">
-            You lost your last battle. Try again!
+            The dragon held its ground. Try again!
           </p>
         )}
 
