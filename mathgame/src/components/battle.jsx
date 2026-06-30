@@ -1,5 +1,7 @@
 import { useState, useRef } from 'react'
 import { sampleQuestions } from '../data/sampleQuestions'
+import dragonImg from '../assets/dragon.png'
+import heroImg from '../assets/hero.png'
 import './battle.css'
 
 const BOSS_MAX_HP = 100
@@ -180,47 +182,9 @@ function HpBar({ hp, maxHp, color }) {
 }
 
 function DragonSvg() {
-  return (
-    <svg viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="170" rx="65" ry="9" fill="rgba(0,0,0,0.15)" />
-      <path d="M35 130 Q8 122 12 95 Q16 110 42 113 Z" fill="#5b8c3a" />
-      <path d="M165 130 Q192 122 188 95 Q184 110 158 113 Z" fill="#5b8c3a" />
-      <ellipse cx="100" cy="115" rx="58" ry="48" fill="#6fae3e" />
-      <ellipse cx="100" cy="132" rx="34" ry="26" fill="#bfe592" />
-      <path d="M55 85 Q22 50 35 15 Q63 38 68 80 Z" fill="#4f8a2c" />
-      <path d="M145 85 Q178 50 165 15 Q137 38 132 80 Z" fill="#4f8a2c" />
-      <rect x="68" y="152" width="15" height="22" rx="6" fill="#5b8c3a" />
-      <rect x="117" y="152" width="15" height="22" rx="6" fill="#5b8c3a" />
-      <circle cx="100" cy="58" r="40" fill="#6fae3e" />
-      <path d="M72 32 L64 8 L80 30 Z" fill="#3f6b1f" />
-      <path d="M128 32 L136 8 L120 30 Z" fill="#3f6b1f" />
-      <circle cx="84" cy="55" r="8" fill="#fff" />
-      <circle cx="116" cy="55" r="8" fill="#fff" />
-      <circle cx="85" cy="56" r="4" fill="#a01818" />
-      <circle cx="115" cy="56" r="4" fill="#a01818" />
-      <ellipse cx="100" cy="77" rx="19" ry="13" fill="#bfe592" />
-      <circle cx="92" cy="75" r="2" fill="#3f6b1f" />
-      <circle cx="108" cy="75" r="2" fill="#3f6b1f" />
-      <path d="M88 90 L92 98 L96 90 Z" fill="#fff" />
-      <path d="M104 90 L108 98 L112 90 Z" fill="#fff" />
-    </svg>
-  )
+  return <img src={dragonImg} alt="Math Dragon" className="dragon-img" />
 }
 
 function HeroSvg() {
-  return (
-    <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="190" rx="40" ry="7" fill="rgba(0,0,0,0.18)" />
-      <rect x="78" y="150" width="16" height="38" rx="6" fill="#2d4a73" />
-      <rect x="106" y="150" width="16" height="38" rx="6" fill="#2d4a73" />
-      <path d="M62 100 Q100 88 138 100 L132 158 Q100 168 68 158 Z" fill="#d9a818" />
-      <rect x="64" y="128" width="72" height="11" fill="#6b3f17" />
-      <rect x="40" y="98" width="18" height="55" rx="9" fill="#d9a818" />
-      <rect x="142" y="90" width="18" height="60" rx="9" fill="#d9a818" transform="rotate(15 151 120)" />
-      <rect x="158" y="50" width="9" height="70" fill="#c8c8c8" transform="rotate(15 162 85)" />
-      <rect x="152" y="44" width="20" height="11" fill="#888" transform="rotate(15 162 50)" />
-      <circle cx="100" cy="65" r="34" fill="#6b3f17" />
-      <path d="M68 60 Q70 30 100 28 Q130 30 132 60 Q120 50 100 48 Q80 50 68 60 Z" fill="#4a2a10" />
-    </svg>
-  )
+  return <img src={heroImg} alt="Hero" className="hero-img" />
 }
