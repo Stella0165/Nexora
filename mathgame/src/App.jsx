@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import Battle from './components/battle'
 import UsernameModal from './components/username'
-import LeaderboardModal from './components/leaderBoard'
-import { submitScore } from './lib/leaderBoard'
+import LeaderboardModal from './components/leaderboard'
+import { submitScore } from './lib/leaderboard'
 import './App.css'
 
 const XP_PER_VICTORY = 50

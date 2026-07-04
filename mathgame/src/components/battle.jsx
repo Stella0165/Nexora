@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { generateMathQuestionsSafe, getSampleQuestions, checkAnswer, getLevelConfig, generateStepsForQuestion } from '../lib/ai'
 import { generateBossLine } from '../lib/ai'
-import LeaderboardModal from './leaderBoard'
+import LeaderboardModal from './leaderboard'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
 import './battle.css'
