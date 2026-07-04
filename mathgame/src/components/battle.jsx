@@ -1,15 +1,15 @@
 import { useState, useRef, useEffect } from 'react'
 import { generateMathQuestionsSafe, getSampleQuestions, checkAnswer, getLevelConfig, generateStepsForQuestion } from '../lib/ai'
 import { generateBossLine } from '../lib/ai'
-import LeaderboardModal from './leaderboard'
+import LeaderboardModal from './leaderBoard'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
 import './battle.css'
 
 const BOSS_MAX_HP = 100
-const PLAYER_MAX_HP = 100
-const DAMAGE_PER_CORRECT = 20
-const DAMAGE_PER_WRONG = 15
+const PLAYER_MAX_HP = 80
+const DAMAGE_PER_CORRECT = 25
+const DAMAGE_PER_WRONG = 30
 
 const FALLBACK_VICTORY_LINES = [
   'No... my flames have failed me. You have bested me, hero.',
@@ -17,7 +17,6 @@ const FALLBACK_VICTORY_LINES = [
 ]
 const FALLBACK_DEFEAT_LINES = [
   'Your math was no match for my fury!',
-  'Another challenger falls before the Math Dragon!',
 ]
 
 function shuffle(array) {
@@ -31,7 +30,7 @@ function randomOf(arr) {
 export default function Battle({ level = 1, bossName = 'Math Dragon', username, onBattleEnd }) {
   const [questions, setQuestions] = useState(() => getSampleQuestions(level, 10))
   const [showLeaderboard, setShowLeaderboard] = useState(false)
-  const [questionsSource, setQuestionsSource] = useState('loading') // 'loading' | 'ai' | 'fallback'
+  const [questionsSource, setQuestionsSource] = useState('loading')
   const [questionIndex, setQuestionIndex] = useState(0)
   const [bossHp, setBossHp] = useState(BOSS_MAX_HP)
   const [playerHp, setPlayerHp] = useState(PLAYER_MAX_HP)
@@ -42,7 +41,7 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', username, 
   const [heroAnim, setHeroAnim] = useState('')
   const [bossLine, setBossLine] = useState(null)
   const [awaitingNext, setAwaitingNext] = useState(false)
-  const [missedSteps, setMissedSteps] = useState(null) // steps for the currently-shown wrong question
+  const [missedSteps, setMissedSteps] = useState(null)
   const [stepsLoading, setStepsLoading] = useState(false)
   const inputRef = useRef(null)
 
@@ -110,10 +109,11 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', username, 
         if (newBossHp === 0) {
           setTimeout(() => {
             setGameOver('victory')
-            onBattleEnd?.('victory')
+            setTimeout(() => {
+              onBattleEnd?.('victory')
+            }, 3000)
           }, 500)
         } else {
-          // correct answers still auto-advance to the next question
           setTimeout(() => {
             setFeedback(null)
             setBossAnim('')
@@ -136,22 +136,19 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', username, 
         if (newPlayerHp === 0) {
           setTimeout(() => {
             setGameOver('defeat')
-            onBattleEnd?.('defeat')
+            setTimeout(() => {
+              onBattleEnd?.('defeat')
+            }, 3000)
           }, 500)
         } else {
-          // pause here: show the worked-out steps and wait for the player
-          // to press "Next Question" instead of auto-advancing
           setTimeout(() => {
             setBossAnim('')
             setHeroAnim('')
             setAwaitingNext(true)
 
             if (currentQuestion.steps) {
-              // fallback-bank questions already have steps baked in
               setMissedSteps(currentQuestion.steps)
             } else {
-              // AI questions don't carry steps upfront (saves tokens on the
-              // bulk call) — fetch them now, just for this one question
               setStepsLoading(true)
               generateStepsForQuestion(currentQuestion)
                 .then((steps) => setMissedSteps(steps))
@@ -245,7 +242,7 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', username, 
         ) : awaitingNext ? (
           <div className="step-review">
             <p className="feedback-wrong">
-              Not quite — the answer was {JSON.stringify(currentQuestion.answer)}.
+              You're wrong, the answer is {JSON.stringify(currentQuestion.answer)}.
             </p>
 
             {stepsLoading ? (
@@ -287,6 +284,7 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', username, 
 
             <div className="feedback-slot">
               {feedback === 'correct' && <p className="feedback-correct">Correct! You strike the boss!</p>}
+              {feedback === 'wrong' && <p className="feedback-wrong">You're wrong, dragon attacks you!</p>}
             </div>
 
             {questionsSource === 'fallback' && (

@@ -35,7 +35,7 @@ export default function LeaderboardModal({ onClose, currentUsername }) {
         <div className="rune-corner rune-corner-br" />
 
         <button className="leaderboard-close" onClick={onClose} aria-label="Close">
-          ✕
+          X
         </button>
 
         <h2 className="leaderboard-title">Hall of Heroes</h2>

@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import Battle from './components/battle'
 import UsernameModal from './components/username'
-import { submitScore } from './lib/leaderboard'
+import LeaderboardModal from './components/leaderBoard'
+import { submitScore } from './lib/leaderBoard'
 import './App.css'
 
-const XP_PER_VICTORY = 30
+const XP_PER_VICTORY = 50
 const XP_PER_LEVEL = 100
 const MAX_LEVEL = 6
 
@@ -21,6 +22,7 @@ function App() {
   const [screen, setScreen] = useState('home')
   const [lastResult, setLastResult] = useState(null)
   const [showUsernameModal, setShowUsernameModal] = useState(false)
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
 
   function handleFightClick() {
     if (player.username) {
@@ -61,7 +63,16 @@ function App() {
 
   return (
     <div className="app-shell">
-      <div className="home-card">
+      <div className="home-card" style={{ position: 'relative' }}>
+        <button
+          className="leaderboard-trigger"
+          onClick={() => setShowLeaderboard(true)}
+          aria-label="View leaderboard"
+          title="Leaderboard"
+        >
+          🏆
+        </button>
+
         <div className="rune-corner rune-corner-tl" />
         <div className="rune-corner rune-corner-tr" />
         <div className="rune-corner rune-corner-bl" />
@@ -109,6 +120,13 @@ function App() {
         <UsernameModal
           onSubmit={handleUsernameSubmit}
           onCancel={() => setShowUsernameModal(false)}
+        />
+      )}
+
+      {showLeaderboard && (
+        <LeaderboardModal
+          onClose={() => setShowLeaderboard(false)}
+          currentUsername={player.username}
         />
       )}
     </div>

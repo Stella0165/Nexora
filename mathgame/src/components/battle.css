@@ -11,6 +11,7 @@
   font-family: var(--font-display, 'Cinzel', serif);
   font-size: 1.25rem;
   letter-spacing: 0.03em;
+  margin-top: 30px;
   margin-bottom: 14px;
   color: var(--text-primary, #f4efe6);
 }
@@ -91,7 +92,7 @@
 
 .player-hp-card {
   position: absolute;
-  bottom: 82px;
+  bottom: 40px;
   right: 14px;
   background: rgba(28, 23, 51, 0.92);
   border: 1px solid var(--border-rune, rgba(242, 181, 63, 0.35));
