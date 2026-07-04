@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Battle from './components/battle'
 import UsernameModal from './components/username'
+import { submitScore } from './lib/leaderboard'
 import './App.css'
 
 const XP_PER_VICTORY = 30
@@ -39,9 +40,12 @@ function App() {
     setLastResult(result)
     setScreen('home')
 
-    if (result === 'victory') {
-      setPlayer((p) => ({ ...p, xp: p.xp + XP_PER_VICTORY }))
-    }
+    setPlayer((p) => {
+      const newXp = result === 'victory' ? p.xp + XP_PER_VICTORY : p.xp
+      const newLevel = levelFromXp(newXp)
+      submitScore(p.username, newLevel, newXp)
+      return { ...p, xp: newXp }
+    })
   }
 
   const level = levelFromXp(player.xp)
@@ -50,7 +54,7 @@ function App() {
   if (screen === 'battle') {
     return (
       <div className="app-shell">
-        <Battle level={level} bossName="Math Dragon" onBattleEnd={handleBattleEnd} />
+        <Battle level={level} bossName="Math Dragon" username={player.username} onBattleEnd={handleBattleEnd} />
       </div>
     )
   }

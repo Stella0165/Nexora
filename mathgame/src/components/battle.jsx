@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { generateMathQuestionsSafe, getSampleQuestions, checkAnswer, getLevelConfig } from '../lib/ai'
+import { generateMathQuestionsSafe, getSampleQuestions, checkAnswer, getLevelConfig, generateStepsForQuestion } from '../lib/ai'
 import { generateBossLine } from '../lib/ai'
+import LeaderboardModal from './leaderboard'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
 import './battle.css'
@@ -27,8 +28,9 @@ function randomOf(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
-export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEnd }) {
+export default function Battle({ level = 1, bossName = 'Math Dragon', username, onBattleEnd }) {
   const [questions, setQuestions] = useState(() => getSampleQuestions(level, 10))
+  const [showLeaderboard, setShowLeaderboard] = useState(false)
   const [questionsSource, setQuestionsSource] = useState('loading') // 'loading' | 'ai' | 'fallback'
   const [questionIndex, setQuestionIndex] = useState(0)
   const [bossHp, setBossHp] = useState(BOSS_MAX_HP)
@@ -40,6 +42,8 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
   const [heroAnim, setHeroAnim] = useState('')
   const [bossLine, setBossLine] = useState(null)
   const [awaitingNext, setAwaitingNext] = useState(false)
+  const [missedSteps, setMissedSteps] = useState(null) // steps for the currently-shown wrong question
+  const [stepsLoading, setStepsLoading] = useState(false)
   const inputRef = useRef(null)
 
   const levelName = getLevelConfig(level).name
@@ -141,6 +145,19 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
             setBossAnim('')
             setHeroAnim('')
             setAwaitingNext(true)
+
+            if (currentQuestion.steps) {
+              // fallback-bank questions already have steps baked in
+              setMissedSteps(currentQuestion.steps)
+            } else {
+              // AI questions don't carry steps upfront (saves tokens on the
+              // bulk call) — fetch them now, just for this one question
+              setStepsLoading(true)
+              generateStepsForQuestion(currentQuestion)
+                .then((steps) => setMissedSteps(steps))
+                .catch(() => setMissedSteps(null))
+                .finally(() => setStepsLoading(false))
+            }
           }, 500)
         }
       }, 250)
@@ -151,6 +168,8 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
     setFeedback(null)
     setUserAnswer('')
     setAwaitingNext(false)
+    setMissedSteps(null)
+    setStepsLoading(false)
     setQuestionIndex((i) => i + 1)
     inputRef.current?.focus()
   }
@@ -183,7 +202,16 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
   }
 
   return (
-    <div className="battle-container">
+    <div className="battle-container" style={{ position: 'relative' }}>
+      <button
+        className="leaderboard-trigger"
+        onClick={() => setShowLeaderboard(true)}
+        aria-label="View leaderboard"
+        title="Leaderboard"
+      >
+        🏆
+      </button>
+
       <h2 className="battle-title">Level {level}: {levelName} — Boss: {bossName}</h2>
 
       <div className="arena">
@@ -220,9 +248,11 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
               Not quite — the answer was {JSON.stringify(currentQuestion.answer)}.
             </p>
 
-            {currentQuestion.steps ? (
+            {stepsLoading ? (
+              <p className="steps-unavailable">Working out the steps...</p>
+            ) : missedSteps ? (
               <ol className="steps-list">
-                {currentQuestion.steps.map((step, i) => (
+                {missedSteps.map((step, i) => (
                   <li key={i}>{step}</li>
                 ))}
               </ol>
@@ -265,6 +295,13 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
           </>
         )}
       </div>
+
+      {showLeaderboard && (
+        <LeaderboardModal
+          onClose={() => setShowLeaderboard(false)}
+          currentUsername={username}
+        />
+      )}
     </div>
   )
 }
