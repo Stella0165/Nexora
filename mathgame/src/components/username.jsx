@@ -37,7 +37,7 @@ export default function UsernameModal({ onSubmit, onCancel }) {
         </div>
 
         <h2 className="modal-title">Enter the Arena</h2>
-        <p className="modal-subtitle">What should the dragon call you?</p>
+        <p className="modal-subtitle">What is your name?</p>
 
         <form onSubmit={handleSubmit}>
           <input
