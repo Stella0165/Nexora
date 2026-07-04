@@ -39,6 +39,7 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
   const [bossAnim, setBossAnim] = useState('')
   const [heroAnim, setHeroAnim] = useState('')
   const [bossLine, setBossLine] = useState(null)
+  const [awaitingNext, setAwaitingNext] = useState(false)
   const inputRef = useRef(null)
 
   const levelName = getLevelConfig(level).name
@@ -51,10 +52,7 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
       .then((qs) => {
         if (cancelled) return
         setQuestions(shuffle(qs))
-        // generateMathQuestionsSafe already falls back internally, but we still
-        // want the UI to know a fallback question set was returned (no `steps`
-        // field on live AI questions, sample ones always have it)
-        setQuestionsSource(qs[0]?.steps ? 'fallback' : 'ai')
+        setQuestionsSource(qs[0]?.source === 'fallback' ? 'fallback' : 'ai')
       })
       .catch(() => {
         if (cancelled) return
@@ -110,6 +108,16 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
             setGameOver('victory')
             onBattleEnd?.('victory')
           }, 500)
+        } else {
+          // correct answers still auto-advance to the next question
+          setTimeout(() => {
+            setFeedback(null)
+            setBossAnim('')
+            setHeroAnim('')
+            setUserAnswer('')
+            setQuestionIndex((i) => i + 1)
+            inputRef.current?.focus()
+          }, 900)
         }
       }, 200)
     } else {
@@ -126,18 +134,25 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
             setGameOver('defeat')
             onBattleEnd?.('defeat')
           }, 500)
+        } else {
+          // pause here: show the worked-out steps and wait for the player
+          // to press "Next Question" instead of auto-advancing
+          setTimeout(() => {
+            setBossAnim('')
+            setHeroAnim('')
+            setAwaitingNext(true)
+          }, 500)
         }
       }, 250)
     }
+  }
 
-    setTimeout(() => {
-      setFeedback(null)
-      setBossAnim('')
-      setHeroAnim('')
-      setUserAnswer('')
-      setQuestionIndex((i) => i + 1)
-      inputRef.current?.focus()
-    }, 1100)
+  const handleNextQuestion = () => {
+    setFeedback(null)
+    setUserAnswer('')
+    setAwaitingNext(false)
+    setQuestionIndex((i) => i + 1)
+    inputRef.current?.focus()
   }
 
   if (gameOver === 'victory') {
@@ -199,6 +214,26 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
       <div className="question-box">
         {questionsSource === 'loading' ? (
           <p className="question-loading">Summoning a question from the arcane mists...</p>
+        ) : awaitingNext ? (
+          <div className="step-review">
+            <p className="feedback-wrong">
+              Not quite — the answer was {JSON.stringify(currentQuestion.answer)}.
+            </p>
+
+            {currentQuestion.steps ? (
+              <ol className="steps-list">
+                {currentQuestion.steps.map((step, i) => (
+                  <li key={i}>{step}</li>
+                ))}
+              </ol>
+            ) : (
+              <p className="steps-unavailable">No step-by-step breakdown available for this one.</p>
+            )}
+
+            <button className="attack-button" onClick={handleNextQuestion}>
+              Next Question
+            </button>
+          </div>
         ) : (
           <>
             <p className="question-text">{currentQuestion.question}</p>
@@ -222,11 +257,6 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEn
 
             <div className="feedback-slot">
               {feedback === 'correct' && <p className="feedback-correct">Correct! You strike the boss!</p>}
-              {feedback === 'wrong' && (
-                <p className="feedback-wrong">
-                  You got it wrong, the answer was {JSON.stringify(currentQuestion.answer)}. The boss attacks!
-                </p>
-              )}
             </div>
 
             {questionsSource === 'fallback' && (

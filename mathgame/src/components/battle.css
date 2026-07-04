@@ -238,6 +238,55 @@
   opacity: 0.7;
 }
 
+/* ── Step-review panel (shown on wrong answer, before "Next Question") ── */
+.step-review {
+  text-align: left;
+  animation: step-review-in 0.25s ease;
+}
+
+.step-review .feedback-wrong {
+  margin: 0 0 12px;
+  font-size: 0.98rem;
+}
+
+.steps-list {
+  margin: 0 0 18px;
+  padding-left: 20px;
+  list-style: decimal;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-rune, rgba(242, 181, 63, 0.35));
+  border-radius: 10px;
+  padding: 14px 16px 14px 34px;
+}
+
+.steps-list li {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 0.85rem;
+  line-height: 1.7;
+  color: var(--text-primary, #f4efe6);
+}
+
+.steps-list li::marker {
+  color: var(--accent-ember, #f2b53f);
+  font-weight: 700;
+}
+
+.steps-unavailable {
+  font-size: 0.85rem;
+  color: var(--text-muted, #aaa1c4);
+  margin: 0 0 18px;
+  font-style: italic;
+}
+
+.step-review .attack-button {
+  width: 100%;
+}
+
+@keyframes step-review-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .result-card {
   padding: 32px 28px;
   border-radius: 18px;
@@ -314,7 +363,8 @@
   .hero-hit,
   .flash-red,
   .hero-lunge,
-  .dragon-defeated {
+  .dragon-defeated,
+  .step-review {
     animation: none !important;
   }
 }
