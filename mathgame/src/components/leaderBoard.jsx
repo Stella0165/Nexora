@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getTopPlayers } from '../lib/leaderboard'
-import './leaderBoard.css'
+import './leaderboard.css'
 
 export default function LeaderboardModal({ onClose, currentUsername }) {
   const [players, setPlayers] = useState([])
