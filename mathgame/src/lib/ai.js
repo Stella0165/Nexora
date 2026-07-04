@@ -3,17 +3,20 @@ import { LEVEL_CONFIG, MAX_LEVEL, getLevelConfig } from './levelConfig'
 import sampleQuestionsByLevel from './sampleQuestions.json'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
-const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
-const model = genAI.getGenerativeModel({
-  model: 'gemini-2.0-flash',
-  generationConfig: { temperature: 0.7 }
-})
+const ai = new GoogleGenAI({ apiKey: GEMINI_API_KEY })
 
 async function callGemini(prompt) {
-  const result = await model.generateContent(prompt)
-  return result.response.text() ?? ''
+  const response = await ai.models.generateContent({
+    model: 'gemini-2.0-flash',
+    contents: prompt,
+    config: { temperature: 0.7 }
+  })
+  return response.text ?? ''
 }
 
+export { LEVEL_CONFIG, MAX_LEVEL, getLevelConfig }
+
+// ── Generate math questions ─────────────────────────────────────────────
 export async function generateMathQuestions(level, { count = 10, difficulty = 'medium' } = {}) {
   const config = getLevelConfig(level)
 
@@ -61,6 +64,7 @@ ${exampleByType[config.answerType]}
   }
 }
 
+// ── Answer checking (handles integer / decimal / matrix) ────────────────
 export function checkAnswer(question, userAnswer) {
   if (question.answerType === 'matrix') {
     if (!Array.isArray(userAnswer) || userAnswer.length !== question.answer.length) return false
@@ -76,6 +80,7 @@ export function checkAnswer(question, userAnswer) {
   return Number(userAnswer) === question.answer
 }
 
+// ── Generate boss battle dialogue line ───────────────────────────────────
 export async function generateBossLine(bossName, outcome, levelName = '') {
   const prompt = `
 You are ${bossName}, a fierce math dragon boss in a children's educational game.
@@ -94,5 +99,33 @@ Respond with ONLY the dialogue line, no quotes, no explanation.
   } catch (err) {
     console.error('generateBossLine failed:', err)
     throw err
+  }
+}
+
+export function getSampleQuestions(level, count = 10) {
+  const pool = sampleQuestionsByLevel[level] || sampleQuestionsByLevel[MAX_LEVEL]
+  const shuffled = [...pool].sort(() => Math.random() - 0.5)
+  const picked = shuffled.slice(0, Math.min(count, shuffled.length))
+
+  return picked.map((q, i) => ({
+    id: i + 1,
+    level,
+    levelName: getLevelConfig(level).name,
+    question: q.question,
+    answer: q.answer,
+    answerType: q.answerType,
+    steps: q.steps
+  }))
+}
+
+// Drop-in replacement for generateMathQuestions — tries the AI first, and
+// silently falls back to the JSON sample bank if the call fails for any
+// reason (token/quota limit, network error, malformed JSON, etc).
+export async function generateMathQuestionsSafe(level, options = {}) {
+  try {
+    return await generateMathQuestions(level, options)
+  } catch (err) {
+    console.warn(`AI question generation failed for level ${level}, using fallback bank`, err)
+    return getSampleQuestions(level, options.count ?? 10)
   }
 }
