@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Battle from './components/battle'
 import UsernameModal from './components/username'
-import LeaderboardModal from './components/leaderboard'
+import LeaderboardModal from './components/leaderBoard'
 import { submitScore } from './lib/leaderboard'
 import './App.css'
 
