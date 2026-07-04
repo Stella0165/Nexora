@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
-import { sampleQuestions } from '../lib/sampleQuestions.json'
-import { generateMathQuestions, generateBossLine } from '../lib/ai'
+import { generateMathQuestionsSafe, getSampleQuestions, checkAnswer, getLevelConfig } from '../lib/ai'
+import { generateBossLine } from '../lib/ai'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
 import './battle.css'
@@ -27,8 +27,8 @@ function randomOf(arr) {
   return arr[Math.floor(Math.random() * arr.length)]
 }
 
-export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
-  const [questions, setQuestions] = useState(() => shuffle(sampleQuestions))
+export default function Battle({ level = 1, bossName = 'Math Dragon', onBattleEnd }) {
+  const [questions, setQuestions] = useState(() => getSampleQuestions(level, 10))
   const [questionsSource, setQuestionsSource] = useState('loading') // 'loading' | 'ai' | 'fallback'
   const [questionIndex, setQuestionIndex] = useState(0)
   const [bossHp, setBossHp] = useState(BOSS_MAX_HP)
@@ -41,32 +41,37 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
   const [bossLine, setBossLine] = useState(null)
   const inputRef = useRef(null)
 
+  const levelName = getLevelConfig(level).name
+
   useEffect(() => {
     let cancelled = false
+    setQuestionsSource('loading')
 
-    generateMathQuestions(bossName, { count: 10, difficulty: 'medium' })
-      .then((aiQuestions) => {
+    generateMathQuestionsSafe(level, { count: 10, difficulty: 'medium' })
+      .then((qs) => {
         if (cancelled) return
-        setQuestions(shuffle(aiQuestions))
-        setQuestionsSource('ai')
+        setQuestions(shuffle(qs))
+        // generateMathQuestionsSafe already falls back internally, but we still
+        // want the UI to know a fallback question set was returned (no `steps`
+        // field on live AI questions, sample ones always have it)
+        setQuestionsSource(qs[0]?.steps ? 'fallback' : 'ai')
       })
       .catch(() => {
         if (cancelled) return
-        setQuestions(shuffle(sampleQuestions))
+        setQuestions(shuffle(getSampleQuestions(level, 10)))
         setQuestionsSource('fallback')
       })
 
     return () => {
       cancelled = true
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bossName])
+  }, [level])
 
   useEffect(() => {
     if (!gameOver) return
     let cancelled = false
 
-    generateBossLine(bossName, gameOver)
+    generateBossLine(bossName, gameOver, levelName)
       .then((line) => {
         if (!cancelled) setBossLine(line)
       })
@@ -81,7 +86,7 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
     return () => {
       cancelled = true
     }
-  }, [gameOver, bossName])
+  }, [gameOver, bossName, levelName])
 
   const currentQuestion = questions[questionIndex % questions.length]
 
@@ -89,7 +94,7 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
     e.preventDefault()
     if (gameOver || feedback || questionsSource === 'loading') return
 
-    const isCorrect = parseInt(userAnswer, 10) === currentQuestion.answer
+    const isCorrect = checkAnswer(currentQuestion, userAnswer)
 
     if (isCorrect) {
       setFeedback('correct')
@@ -164,7 +169,7 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
 
   return (
     <div className="battle-container">
-      <h2 className="battle-title">Boss battle: {bossName}</h2>
+      <h2 className="battle-title">Level {level}: {levelName} — Boss: {bossName}</h2>
 
       <div className="arena">
         <div className="hill" />
@@ -201,10 +206,11 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
             <form onSubmit={handleSubmit} className="answer-form">
               <input
                 ref={inputRef}
-                type="number"
+                type={currentQuestion.answerType === 'matrix' ? 'text' : 'number'}
                 value={userAnswer}
                 onChange={(e) => setUserAnswer(e.target.value)}
-                placeholder="Answer"
+                placeholder={currentQuestion.answerType === 'matrix' ? 'e.g. 6,8,10,12' : 'Answer'}
+                step={currentQuestion.answerType === 'decimal' ? '0.01' : undefined}
                 className="answer-input"
                 autoFocus
                 disabled={feedback !== null}
@@ -218,7 +224,7 @@ export default function Battle({ bossName = 'Math Dragon', onBattleEnd }) {
               {feedback === 'correct' && <p className="feedback-correct">Correct! You strike the boss!</p>}
               {feedback === 'wrong' && (
                 <p className="feedback-wrong">
-                  You got it wrong, the answer was {currentQuestion.answer}. The boss attacks!
+                  You got it wrong, the answer was {JSON.stringify(currentQuestion.answer)}. The boss attacks!
                 </p>
               )}
             </div>

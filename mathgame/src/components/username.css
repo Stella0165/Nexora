@@ -1,63 +1,91 @@
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(6, 4, 14, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding: 24px;
 }
 
 .modal-card {
-  background: #1e1e2e;
-  color: #fff;
-  padding: 28px 32px;
-  border-radius: 12px;
-  width: 320px;
+  position: relative;
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg-deep-2) 100%);
+  border: 1px solid var(--border-rune);
+  border-radius: 18px;
+  padding: 40px 30px 30px;
   text-align: center;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4);
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 18px 50px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(141, 108, 255, 0.08);
+  max-width: 340px;
+  width: 100%;
+}
+
+.modal-title {
+  margin: 0 0 6px;
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  color: var(--text-primary);
+  text-shadow: 0 0 14px rgba(242, 181, 63, 0.3);
+}
+
+.modal-subtitle {
+  margin: 0 0 18px;
+  color: var(--text-muted);
+  font-size: 0.9rem;
 }
 
 .modal-input {
   width: 100%;
-  padding: 10px 12px;
-  margin-top: 16px;
-  border-radius: 8px;
-  border: 1px solid #444;
-  background: #2a2a3d;
-  color: #fff;
-  font-size: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border-rune);
+  background: var(--panel-soft);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 1rem;
   box-sizing: border-box;
 }
 
+.modal-input:focus {
+  outline: none;
+  border-color: var(--accent-arcane);
+  box-shadow: 0 0 0 3px rgba(141, 108, 255, 0.2);
+}
+
 .modal-error {
-  color: #ff6b6b;
-  font-size: 13px;
-  margin-top: 8px;
+  color: var(--accent-danger);
+  font-size: 0.8rem;
+  margin: 8px 0 0;
+  text-align: left;
 }
 
 .modal-actions {
   display: flex;
   gap: 10px;
   margin-top: 20px;
-  justify-content: center;
 }
 
 .modal-confirm {
-  background: #6c5ce7;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: bold;
+  flex: 1;
 }
 
 .modal-cancel {
+  flex: 1;
   background: transparent;
-  color: #aaa;
-  border: 1px solid #555;
-  padding: 10px 20px;
-  border-radius: 8px;
+  color: var(--text-muted);
+  border: 1px solid var(--border-rune);
+  border-radius: 12px;
+  padding: 15px 20px;
+  font-family: var(--font-body);
+  font-size: 0.9rem;
   cursor: pointer;
+}
+
+.modal-cancel:hover {
+  color: var(--text-primary);
+  border-color: var(--accent-arcane);
 }

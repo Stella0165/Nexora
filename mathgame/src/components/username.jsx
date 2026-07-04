@@ -24,8 +24,20 @@ export default function UsernameModal({ onSubmit, onCancel }) {
   return (
     <div className="modal-overlay">
       <div className="modal-card">
-        <h2>Enter the Arena</h2>
-        <p>What should the dragon call you?</p>
+        <div className="rune-corner rune-corner-tl" />
+        <div className="rune-corner rune-corner-tr" />
+        <div className="rune-corner rune-corner-bl" />
+        <div className="rune-corner rune-corner-br" />
+
+        <div className="sigil" aria-hidden="true">
+          <svg viewBox="0 0 64 64" className="sigil-svg">
+            <polygon points="32,4 58,46 6,46" />
+            <circle cx="32" cy="32" r="20" />
+          </svg>
+        </div>
+
+        <h2 className="modal-title">Enter the Arena</h2>
+        <p className="modal-subtitle">What should the dragon call you?</p>
 
         <form onSubmit={handleSubmit}>
           <input
@@ -48,7 +60,7 @@ export default function UsernameModal({ onSubmit, onCancel }) {
                 Cancel
               </button>
             )}
-            <button type="submit" className="modal-confirm">
+            <button type="submit" className="play-button modal-confirm">
               Enter Battle
             </button>
           </div>

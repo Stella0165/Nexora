@@ -1,12 +1,14 @@
 import { useState } from 'react'
 import Battle from './components/battle'
+import UsernameModal from './components/username'
 import './App.css'
 
 const XP_PER_VICTORY = 30
 const XP_PER_LEVEL = 100
+const MAX_LEVEL = 6
 
 function levelFromXp(xp) {
-  return Math.floor(xp / XP_PER_LEVEL) + 1
+  return Math.min(MAX_LEVEL, Math.floor(xp / XP_PER_LEVEL) + 1)
 }
 
 function xpProgress(xp) {
@@ -14,9 +16,24 @@ function xpProgress(xp) {
 }
 
 function App() {
-  const [player, setPlayer] = useState({ username: 'Player', xp: 0 })
+  const [player, setPlayer] = useState({ username: null, xp: 0 })
   const [screen, setScreen] = useState('home')
   const [lastResult, setLastResult] = useState(null)
+  const [showUsernameModal, setShowUsernameModal] = useState(false)
+
+  function handleFightClick() {
+    if (player.username) {
+      setScreen('battle')
+    } else {
+      setShowUsernameModal(true)
+    }
+  }
+
+  function handleUsernameSubmit(name) {
+    setPlayer((p) => ({ ...p, username: name }))
+    setShowUsernameModal(false)
+    setScreen('battle')
+  }
 
   function handleBattleEnd(result) {
     setLastResult(result)
@@ -27,16 +44,16 @@ function App() {
     }
   }
 
+  const level = levelFromXp(player.xp)
+  const progress = xpProgress(player.xp)
+
   if (screen === 'battle') {
     return (
       <div className="app-shell">
-        <Battle bossName="Math Dragon" onBattleEnd={handleBattleEnd} />
+        <Battle level={level} bossName="Math Dragon" onBattleEnd={handleBattleEnd} />
       </div>
     )
   }
-
-  const level = levelFromXp(player.xp)
-  const progress = xpProgress(player.xp)
 
   return (
     <div className="app-shell">
@@ -54,7 +71,9 @@ function App() {
         </div>
 
         <h1 className="game-title">Nexora</h1>
-        <p className="player-greeting">Welcome back, {player.username}</p>
+        <p className="player-greeting">
+          {player.username ? `Welcome back, ${player.username}` : 'Enter the arena to begin'}
+        </p>
 
         <div className="level-block">
           <div className="level-label-row">
@@ -77,10 +96,17 @@ function App() {
           </p>
         )}
 
-        <button className="play-button" onClick={() => setScreen('battle')}>
+        <button className="play-button" onClick={handleFightClick}>
           Fight the Math Dragon
         </button>
       </div>
+
+      {showUsernameModal && (
+        <UsernameModal
+          onSubmit={handleUsernameSubmit}
+          onCancel={() => setShowUsernameModal(false)}
+        />
+      )}
     </div>
   )
 }
