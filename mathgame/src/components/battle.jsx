@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { sampleQuestions } from '../data/sampleQuestions'
+import { sampleQuestions } from '../lib/sampleQuestions.json'
 import { generateMathQuestions, generateBossLine } from '../lib/ai'
 import dragonImg from '../assets/dragon.png'
 import heroImg from '../assets/hero.png'
