@@ -1,0 +1,134 @@
+.leaderboard-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(6, 4, 14, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.leaderboard-card {
+  position: relative;
+  background: linear-gradient(180deg, var(--panel, #1c1733) 0%, var(--bg-deep-2, #1a1430) 100%);
+  border: 1px solid var(--border-rune, rgba(242, 181, 63, 0.35));
+  border-radius: 18px;
+  padding: 36px 28px 28px;
+  max-width: 360px;
+  width: 100%;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.02) inset,
+    0 18px 50px rgba(0, 0, 0, 0.55),
+    0 0 40px rgba(141, 108, 255, 0.08);
+}
+
+.leaderboard-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted, #aaa1c4);
+  font-size: 1.1rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+}
+.leaderboard-close:hover {
+  color: var(--text-primary, #f4efe6);
+}
+
+.leaderboard-title {
+  margin: 0 0 2px;
+  text-align: center;
+  font-family: var(--font-display, 'Cinzel', serif);
+  font-size: 1.5rem;
+  color: var(--text-primary, #f4efe6);
+  text-shadow: 0 0 14px rgba(242, 181, 63, 0.3);
+}
+
+.leaderboard-subtitle {
+  margin: 0 0 20px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted, #aaa1c4);
+}
+
+.leaderboard-status {
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted, #aaa1c4);
+  padding: 20px 0;
+}
+
+.leaderboard-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.leaderboard-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid transparent;
+}
+
+.leaderboard-row-you {
+  border-color: var(--accent-arcane, #8d6cff);
+  background: rgba(141, 108, 255, 0.1);
+}
+
+.leaderboard-rank {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 0.8rem;
+  color: var(--accent-ember, #f2b53f);
+  width: 28px;
+  flex-shrink: 0;
+}
+
+.leaderboard-name {
+  flex: 1;
+  font-size: 0.92rem;
+  color: var(--text-primary, #f4efe6);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-level {
+  font-family: var(--font-mono, 'Space Mono', monospace);
+  font-size: 0.8rem;
+  color: var(--accent-success, #3ddc97);
+  flex-shrink: 0;
+}
+
+.leaderboard-trigger {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 4;
+  background: rgba(28, 23, 51, 0.92);
+  border: 1px solid var(--border-rune, rgba(242, 181, 63, 0.35));
+  border-radius: 50%;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: var(--accent-ember, #f2b53f);
+}
+
+.leaderboard-trigger:hover {
+  border-color: var(--accent-ember, #f2b53f);
+  transform: translateY(-1px);
+}
