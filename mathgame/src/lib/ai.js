@@ -1,4 +1,6 @@
-import { GoogleGenerativeAI } from '@google/generative-ai'
+import { GoogleGenAI } from '@google/genai'
+import { LEVEL_CONFIG, MAX_LEVEL, getLevelConfig } from './levelConfig'
+import sampleQuestionsByLevel from './sampleQuestions.json'
 
 const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY
 const genAI = new GoogleGenerativeAI(GEMINI_API_KEY)
