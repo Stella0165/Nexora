@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import { checkUsernameExists } from '../lib/leaderboard'
 import './username.css'
 
 export default function UsernameModal({ onSubmit, onCancel }) {
   const [name, setName] = useState('')
   const [error, setError] = useState('')
+  const [checking, setChecking] = useState(false)
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     const trimmed = name.trim()
 
@@ -15,6 +17,15 @@ export default function UsernameModal({ onSubmit, onCancel }) {
     }
     if (trimmed.length > 20) {
       setError('Keep it under 20 characters.')
+      return
+    }
+
+    setChecking(true)
+    const taken = await checkUsernameExists(trimmed)
+    setChecking(false)
+
+    if (taken) {
+      setError('That name is already on the leaderboard. Choose another!')
       return
     }
 
@@ -51,17 +62,18 @@ export default function UsernameModal({ onSubmit, onCancel }) {
             autoFocus
             maxLength={20}
             className="modal-input"
+            disabled={checking}
           />
           {error && <p className="modal-error">{error}</p>}
 
           <div className="modal-actions">
             {onCancel && (
-              <button type="button" onClick={onCancel} className="modal-cancel">
+              <button type="button" onClick={onCancel} className="modal-cancel" disabled={checking}>
                 Cancel
               </button>
             )}
-            <button type="submit" className="play-button modal-confirm">
-              Enter Battle
+            <button type="submit" className="play-button modal-confirm" disabled={checking}>
+              {checking ? 'Checking...' : 'Enter Battle'}
             </button>
           </div>
         </form>

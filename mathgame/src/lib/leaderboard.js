@@ -39,3 +39,23 @@ export async function getTopPlayers(count = 10) {
     return []
   }
 }
+
+export async function checkUsernameExists(username) {
+  const trimmed = (username ?? '').trim()
+  if (!trimmed) return false
+
+  try {
+    const { data, error } = await supabase
+      .from(TABLE)
+      .select('username')
+      .ilike('username', trimmed)
+      .limit(1)
+
+    if (error) throw error
+
+    return (data ?? []).length > 0
+  } catch (err) {
+    console.error('checkUsernameExists failed:', err)
+    return false
+  }
+}
