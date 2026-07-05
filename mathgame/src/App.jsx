@@ -7,7 +7,7 @@ import './App.css'
 
 const XP_PER_VICTORY = 50
 const XP_PER_LEVEL = 100
-const MAX_LEVEL = 6
+const MAX_LEVEL = 5
 
 function levelFromXp(xp) {
   return Math.min(MAX_LEVEL, Math.floor(xp / XP_PER_LEVEL) + 1)

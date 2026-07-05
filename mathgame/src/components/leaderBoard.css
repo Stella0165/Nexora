@@ -96,8 +96,9 @@
   font-family: var(--font-mono, 'Space Mono', monospace);
   font-size: 0.8rem;
   color: var(--accent-ember, #f2b53f);
-  width: 28px;
+  width: 92px;
   flex-shrink: 0;
+  text-align: left;
 }
 
 .leaderboard-name {
@@ -107,6 +108,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  text-align: center;
 }
 
 .leaderboard-level {
@@ -114,6 +116,9 @@
   font-size: 0.8rem;
   color: var(--accent-success, #3ddc97);
   flex-shrink: 0;
+  width: 92px;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .leaderboard-level-max {
