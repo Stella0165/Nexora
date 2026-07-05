@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getTopPlayers } from '../lib/leaderboard'
+import { MAX_LEVEL } from '../lib/levelConfig'
 import './leaderBoard.css'
 
 export default function LeaderboardModal({ onClose, currentUsername }) {
@@ -49,16 +50,23 @@ export default function LeaderboardModal({ onClose, currentUsername }) {
 
         {!loading && !error && players.length > 0 && (
           <ol className="leaderboard-list">
-            {players.map((p) => (
-              <li
-                key={p.username}
-                className={`leaderboard-row ${p.username === currentUsername ? 'leaderboard-row-you' : ''}`}
-              >
-                <span className="leaderboard-rank">#{p.rank}</span>
-                <span className="leaderboard-name">{p.username}</span>
-                <span className="leaderboard-level">Lv.{p.level}</span>
-              </li>
-            ))}
+            {players.map((p) => {
+              const displayLevel = Math.min(p.level, MAX_LEVEL)
+              const isMax = p.level >= MAX_LEVEL
+
+              return (
+                <li
+                  key={p.username}
+                  className={`leaderboard-row ${p.username === currentUsername ? 'leaderboard-row-you' : ''}`}
+                >
+                  <span className="leaderboard-rank">#{p.rank}</span>
+                  <span className="leaderboard-name">{p.username}</span>
+                  <span className="leaderboard-level">
+                    Lv.{displayLevel}{isMax ? ' (max)' : ''}
+                  </span>
+                </li>
+              )
+            })}
           </ol>
         )}
       </div>

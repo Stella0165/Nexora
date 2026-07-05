@@ -1,4 +1,3 @@
-
 export const LEVEL_CONFIG = {
   1: {
     name: 'Addition & Subtraction',
@@ -18,18 +17,6 @@ export const LEVEL_CONFIG = {
 - Numbers should mostly stay within the 1-12 times-table range`
   },
   3: {
-    name: 'Matrices',
-    topic: '2x2 matrix addition, subtraction, and multiplication',
-    answerType: 'matrix',
-    instructions: `
-- Show two 2x2 matrices in the question text using bracket notation,
-  e.g. "[[1,2],[3,4]] + [[5,6],[7,8]] = ?"
-- Operation can be matrix addition, subtraction, or multiplication of two 2x2 matrices
-- Keep numbers small (0-9) so mental/paper math stays manageable
-- The "answer" field MUST be a flat array of 4 numbers representing the
-  resulting 2x2 matrix in row-major order, e.g. [6,8,10,12]`
-  },
-  4: {
     name: 'Linear Regression',
     topic: 'simple linear regression (line of best fit)',
     answerType: 'decimal',
@@ -41,7 +28,7 @@ export const LEVEL_CONFIG = {
 - Choose points so the answer is exact, not a statistical estimate
 - The "answer" field MUST be a single number, can be decimal (e.g. 2.5)`
   },
-  5: {
+  4: {
     name: 'Algebra (Quadratics)',
     topic: 'solving quadratic equations',
     answerType: 'integer',
@@ -53,7 +40,7 @@ export const LEVEL_CONFIG = {
 - Never ask for "the roots" (plural), since the answer must be a single number
 - The "answer" field MUST be a single integer`
   },
-  6: {
+  5: {
     name: 'Probability (Final Boss)',
     topic: 'probability',
     answerType: 'decimal',

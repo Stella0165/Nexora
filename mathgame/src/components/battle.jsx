@@ -209,7 +209,7 @@ export default function Battle({ level = 1, bossName = 'Math Dragon', username, 
         🏆
       </button>
 
-      <h2 className="battle-title">Level {level}: {levelName} — Boss: {bossName}</h2>
+      <h2 className="battle-title">Level {level}: {levelName} - Boss: {bossName}</h2>
 
       <div className="arena">
         <div className="hill" />
